@@ -1,2 +1,2 @@
-Version 1.1 of Sea Boat Fights is planned to be released on the eighth of August, 2019. It will include extra features listed below.
+Version 1.1 of Sea Boat Fights is planned to be released on the ninth of August, 2019. It will include extra features listed below.
 Adding whirlpools. Whirlpools have a suction force with a rotational force that pulls you in while dealing damage.
