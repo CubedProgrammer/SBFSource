@@ -1,10 +1,12 @@
 package com.sea.main;
 import java.awt.*;
 import java.awt.image.*;
+import java.io.*;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import com.sea.entity.*;
+import com.sea.entity.enemies.*;
 import com.sea.event.*;
 import com.sea.scene.*;
 import com.sea.world.*;
@@ -16,6 +18,7 @@ public class SeaBoatWindow extends JFrame
 	//private int[]pixels;
 	private boolean running;
 	private Thread thread;
+	private Thread command;
 	private Scene scene;
 	private BaseWorld world;
 	private boolean playing;
@@ -31,6 +34,7 @@ public class SeaBoatWindow extends JFrame
 	private boolean autofire;
 	private long debugPrecision;
 	private boolean highQuality;
+	private boolean sandbox;
 	public SeaBoatWindow()
 	{
 		super("Sea Boat Fight");
@@ -67,6 +71,186 @@ public class SeaBoatWindow extends JFrame
 	public void setScene(Scene scene)
 	{
 		this.scene=scene;
+	}
+	public void cmd()
+	{
+		BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
+		String s="";
+		String[]args;
+		try
+		{
+			Entity en=null;
+			double x=0;
+			double y=0;
+			double size=0;
+			while((s=reader.readLine())!=null&&this.running)
+			{
+				if(this.world!=null)
+				{
+					args=s.split(" ");
+					if(args.length>0)
+					{
+						if("exit".equals(args[0]))
+						{
+							this.running=false;
+						}
+						else if("spawn".equals(args[0]))
+						{
+							x=0;
+							y=0;
+							if(args.length>=4)
+							{
+								x=Integer.parseInt(args[2]);
+								y=Integer.parseInt(args[3]);
+							}
+							if("redboat".equals(args[1]))
+							{
+								en=new RedBoat(x,y);
+							}
+							else if("orangeboat".equals(args[1]))
+							{
+								en=new OrangeBoat(x,y);
+							}
+							else if("yellowboat".equals(args[1]))
+							{
+								en=new YellowBoat(x,y);
+							}
+							else if("greenboat".equals(args[1]))
+							{
+								en=new GreenBoat(x,y);
+							}
+							else if("blueboat".equals(args[1]))
+							{
+								en=new BlueBoat(x,y);
+							}
+							else if("violetboat".equals(args[1]))
+							{
+								en=new VioletBoat(x,y);
+							}
+							else if("island".equals(args[1]))
+							{
+								size=16;
+								if(args.length>=5)
+								{
+									size=Integer.parseInt(args[4]);
+								}
+								en=new Island(x,y,size);
+							}
+							this.world.addEntity(en);
+						}
+						else if("kill".equals(args[0]))
+						{
+							if("all".equals(args[1]))
+							{
+								if(args.length==2)
+								{
+									for(int i=0;i<this.world.getEntityCount();i++)
+									{
+										en=this.world.getEntity(i);
+										en.takeDamage(Long.MAX_VALUE);
+									}
+								}
+								else
+								{
+									if("redboat".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof RedBoat)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("orangeboat".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof OrangeBoat)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("yellowboat".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof YellowBoat)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("greenboat".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof GreenBoat)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("blueboat".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof BlueBoat)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("violetboat".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof VioletBoat)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("island".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof Island)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+									else if("player".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof Player)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	public void playScene(Graphics2D g,MouseInput m,KeyInput k)
 	{
@@ -240,9 +424,9 @@ public class SeaBoatWindow extends JFrame
 	{
 		Random r=new Random(seed);
 		Random random=new Random((~seed)*(seed^r.nextLong())+Double.doubleToRawLongBits(r.nextGaussian()*12));
-		Island island;
-		double size;
-		double theta,distance;
+		Island island=null;
+		double size=0;
+		double theta=0,distance=0;
 		for(int i=0;i<=(random.nextInt()&0xFF);i++)
 		{
 			size=(random.nextDouble()+2)*30;
@@ -268,9 +452,13 @@ public class SeaBoatWindow extends JFrame
 				Scene s=((BaseScene)this.scene).getScene()==null?this::playScene:((BaseScene)this.scene).getScene();
 				if(((BaseScene)this.scene).getScene()==null)
 				{
+					this.sandbox=((com.sea.scene.Menu)this.scene).isSandboxRequested();
 					this.world=new BaseWorld(1000,this.highQuality);
 					this.world.addEntity(new Player(0,0));
-					this.worldGeneration(SeaBoatWindow.starttime);
+					if(!this.sandbox)
+					{
+						this.worldGeneration(SeaBoatWindow.starttime);
+					}
 					this.playing=true;
 				}
 				else
@@ -429,8 +617,10 @@ public class SeaBoatWindow extends JFrame
 	public synchronized void start()
 	{
 		this.thread=new Thread(this::run);
+		this.command=new Thread(this::cmd);
 		this.running=true;
 		this.thread.start();
+		this.command.start();
 	}
 	public synchronized void stop()
 	{
