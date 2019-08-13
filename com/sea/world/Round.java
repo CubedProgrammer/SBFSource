@@ -35,42 +35,42 @@ public final class Round
 	public final Entity[]spawn(double radius)
 	{
 		Entity[]enemies=new Entity[this.red+this.orange+this.yellow+this.green+this.blue+this.violet];
-		double theta,r;
+		double theta=0,r=0;
 		for(int i=0;i<this.red;i++)
 		{
-			theta=(this.random.nextDouble()-1/2)*Math.PI*2;
+			theta+=Math.PI/6;
 			r=this.random.nextDouble()*(987.2);
 			enemies[i]=new RedBoat(Math.sin(theta)*r,Math.cos(theta)*r);
 		}
 		for(int i=0;i<this.orange;i++)
 		{
-			theta=(this.random.nextDouble()-1/2)*Math.PI*2;
+			theta+=Math.PI/12;
 			r=this.random.nextDouble()*(987.2);
 			enemies[i+this.red]=new OrangeBoat(Math.sin(theta)*r,Math.cos(theta)*r);
 		}
 		for(int i=0;i<this.yellow;i++)
 		{
-			theta=(this.random.nextDouble()-1/2)*Math.PI*2;
+			theta+=Math.PI/12;
 			r=this.random.nextDouble()*(987.2);
-			enemies[i+red+orange]=new YellowBoat(Math.sin(theta)*r,Math.cos(theta)*r);
+			enemies[i+this.red+this.orange]=new YellowBoat(Math.sin(theta)*r,Math.cos(theta)*r);
 		}
 		for(int i=0;i<this.green;i++)
 		{
-			theta=(this.random.nextDouble()-1/2)*Math.PI*2;
+			theta+=Math.PI/12;
 			r=this.random.nextDouble()*(987.2);
-			enemies[i+red+orange+yellow]=new GreenBoat(Math.sin(theta)*r,Math.cos(theta)*r);
+			enemies[i+this.red+this.orange+this.yellow]=new GreenBoat(Math.sin(theta)*r,Math.cos(theta)*r);
 		}
 		for(int i=0;i<this.blue;i++)
 		{
-			theta=(this.random.nextDouble()-1/2)*Math.PI*2;
+			theta+=Math.PI/12;
 			r=this.random.nextDouble()*(987.2);
-			enemies[i+red+orange+yellow+green]=new BlueBoat(Math.sin(theta)*r,Math.cos(theta)*r);
+			enemies[i+this.red+this.orange+this.yellow+this.green]=new BlueBoat(Math.sin(theta)*r,Math.cos(theta)*r);
 		}
 		for(int i=0;i<this.violet;i++)
 		{
-			theta=(this.random.nextDouble()-1/2)*Math.PI*2;
+			theta+=Math.PI/12;
 			r=this.random.nextDouble()*(987.2);
-			enemies[i+red+orange+yellow+green+blue]=new VioletBoat(Math.sin(theta)*r,Math.cos(theta)*r);
+			enemies[i+this.red+this.orange+this.yellow+this.green+this.blue]=new VioletBoat(Math.sin(theta)*r,Math.cos(theta)*r);
 		}
 		return enemies;
 	}

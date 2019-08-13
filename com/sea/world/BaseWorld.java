@@ -15,8 +15,9 @@ public class BaseWorld
 	private String titleNotification;
 	private int titleNotificationTime;
 	private long memory;
+	private boolean sandbox;
 	//private Random random;
-	public BaseWorld(double radius,boolean highQuality)
+	public BaseWorld(double radius,boolean highQuality,boolean sandbox)
 	{
 		this.radius=radius;
 		this.highQuality=highQuality;
@@ -45,6 +46,7 @@ public class BaseWorld
 		this.rounds[18]=new Round(0,0,0,0,5,0,this.rounds[17].getNextSeed());
 		this.rounds[19]=new Round(0,0,0,0,10,0,this.rounds[18].getNextSeed());
 		this.rounds[20]=new Round(0,0,0,0,0,1,this.rounds[19].getNextSeed());
+		this.sandbox=sandbox;
 		int exptotal=0;
 		for(int i=0;i<this.rounds.length;i++)
 		{
@@ -112,8 +114,12 @@ public class BaseWorld
 	public long getMemoryUsage()
 	{
 		return this.memory+this.rounds.length*24;
-	}/*
-	public void createDarkerWave(int[]pixels,int width,int height,int x,int y,int size)
+	}
+	public boolean isWorldSandbox()
+	{
+		return this.sandbox;
+	}
+	/*public void createDarkerWave(int[]pixels,int width,int height,int x,int y,int size)
 	{
 		double distance=0;
 		double distanceX=0;
@@ -140,7 +146,8 @@ public class BaseWorld
 		ArrayList<Entity>enemySight;
 		Entity[]enemyTargets;
 		Entity[]shots;
-		if(this.getEnemyCount()==0)
+		ArrayList<Entity>requested=null;
+		if(this.getEnemyCount()==0&&!this.sandbox)
 		{
 			if(this.round<this.rounds.length)
 			{
@@ -265,6 +272,21 @@ public class BaseWorld
 					}
 				}
 			}
+			if(this.entities.get(i).requestedEntityRadius()>0)
+			{
+				requested=new ArrayList<>();
+				for(int j=0;j<this.entities.size();j++)
+				{
+					if(i!=j)
+					{
+						if(this.entities.get(i).getDistanceBetween(this.entities.get(j))<=this.entities.get(i).requestedEntityRadius())
+						{
+							requested.add(this.entities.get(j));
+						}
+					}
+				}
+				this.entities.get(i).giveRequestedEntities(requested.toArray(new Entity[requested.size()]));
+			}
 			this.entities.get(i).run();
 			if(this.entities.get(i).getHealth()==0||Math.sqrt(this.entities.get(i).getX()*this.entities.get(i).getX()+this.entities.get(i).getY()*this.entities.get(i).getY())+this.entities.get(i).getRadius()>this.radius||this.entities.get(i).getID()==2&&this.entities.get(i).getVelocity()==0)
 			{
@@ -292,7 +314,7 @@ public class BaseWorld
 			}
 			else
 			{
-				if(this.getEnemyCount()==0&&this.round<this.rounds.length)
+				if(this.getEnemyCount()==0&&!this.sandbox&&this.round<this.rounds.length)
 				{
 					this.titleNotification="Round: "+Integer.toString(this.round+1);
 					this.titleNotificationTime=255;

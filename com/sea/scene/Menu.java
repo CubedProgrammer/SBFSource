@@ -13,6 +13,7 @@ public class Menu extends BaseScene
 	private float ratioX,ratioY;
 	private Color playButton;
 	private Color controlsButton;
+	private boolean sandbox;
 	public Menu(int w,int h)
 	{
 		this.screenW=w;
@@ -56,6 +57,8 @@ public class Menu extends BaseScene
 			this.playButton=new Color(0,255,0);
 			if(m.isMousePressed())
 			{
+				this.sandbox=m.isThisButtonPressed(1);
+				//System.out.println(this.sandbox);
 				this.setCursor(0);
 				this.setScene(null);
 				this.setRequireSwitch(true);
@@ -84,5 +87,9 @@ public class Menu extends BaseScene
 			this.playButton=new Color(255,0,255);
 			this.controlsButton=new Color(255,0,255);
 		}
+	}
+	public boolean isSandboxRequested()
+	{
+		return this.sandbox;
 	}
 }

@@ -12,6 +12,8 @@ public abstract class Entity
 	private double maxVelocity;
 	private boolean shotRequested;
 	private boolean canOverlap;
+	private double requestEntityRadius;
+	protected Entity[]requested;
 	public Entity(double x,double y,double radius,int ID,long maxHealth,double maxVelocity)
 	{
 		this.x=x;
@@ -22,6 +24,7 @@ public abstract class Entity
 		this.health=this.maxHealth;
 		this.maxVelocity=maxVelocity;
 		this.shotRequested=false;
+		this.requested=new Entity[0];
 	}
 	public double getX()
 	{
@@ -74,6 +77,10 @@ public abstract class Entity
 	public boolean isShotRequested()
 	{
 		return this.shotRequested;
+	}
+	public double requestedEntityRadius()
+	{
+		return this.requestEntityRadius;
 	}
 	public void setVelocityByDirection(double velocity)
 	{
@@ -147,6 +154,19 @@ public abstract class Entity
 	public void setShotRequested(boolean shotRequested)
 	{
 		this.shotRequested=shotRequested;
+	}
+	protected void requestEntitiesWithin(double radius)
+	{
+		this.requestEntityRadius=radius;
+	}
+	public void giveRequestedEntities(Entity[]ens)
+	{
+		this.requested=ens;
+	}
+	public void accelerate(double direction,double velocity)
+	{
+		this.velocityX+=Math.cos(direction)*velocity;
+		this.velocityY+=Math.sin(direction)*velocity;
 	}
 	public Entity[]shoot()
 	{

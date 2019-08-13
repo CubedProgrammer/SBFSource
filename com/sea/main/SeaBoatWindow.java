@@ -34,7 +34,6 @@ public class SeaBoatWindow extends JFrame
 	private boolean autofire;
 	private long debugPrecision;
 	private boolean highQuality;
-	private boolean sandbox;
 	public SeaBoatWindow()
 	{
 		super("Sea Boat Fight");
@@ -71,6 +70,7 @@ public class SeaBoatWindow extends JFrame
 	public void setScene(Scene scene)
 	{
 		this.scene=scene;
+		this.playing=this.scene==null;
 	}
 	public void cmd()
 	{
@@ -85,7 +85,7 @@ public class SeaBoatWindow extends JFrame
 			double size=0;
 			while((s=reader.readLine())!=null&&this.running)
 			{
-				if(this.world!=null)
+				if(this.world!=null&&this.world.isWorldSandbox())
 				{
 					args=s.split(" ");
 					if(args.length>0)
@@ -135,6 +135,15 @@ public class SeaBoatWindow extends JFrame
 									size=Integer.parseInt(args[4]);
 								}
 								en=new Island(x,y,size);
+							}
+							else if("whirlpool".equals(args[1]))
+							{
+								size=16;
+								if(args.length>=5)
+								{
+									size=Integer.parseInt(args[4]);
+								}
+								en=new WhirlPool(x,y,size);
 							}
 							this.world.addEntity(en);
 						}
@@ -229,6 +238,17 @@ public class SeaBoatWindow extends JFrame
 											}
 										}
 									}
+									else if("whirlpool".equals(args[2]))
+									{
+										for(int i=0;i<this.world.getEntityCount();i++)
+										{
+											en=this.world.getEntity(i);
+											if(en instanceof Island)
+											{
+												en.takeDamage(Long.MAX_VALUE);
+											}
+										}
+									}
 									else if("player".equals(args[2]))
 									{
 										for(int i=0;i<this.world.getEntityCount();i++)
@@ -242,6 +262,10 @@ public class SeaBoatWindow extends JFrame
 									}
 								}
 							}
+							else
+							{
+								this.world.getEntity(Integer.parseInt(args[1])).takeDamage(Long.MAX_VALUE);
+							}
 						}
 					}
 				}
@@ -254,7 +278,7 @@ public class SeaBoatWindow extends JFrame
 	}
 	public void playScene(Graphics2D g,MouseInput m,KeyInput k)
 	{
-		if(this.world.getEntity(0).getID()!=0)
+		if(this.world.getEntityCount()==0||this.world.getEntity(0).getID()!=0)
 		{
 			this.setScene(new DeathScene(this.screen,this.getWidth(),this.getHeight()));
 		}
@@ -425,6 +449,7 @@ public class SeaBoatWindow extends JFrame
 		Random r=new Random(seed);
 		Random random=new Random((~seed)*(seed^r.nextLong())+Double.doubleToRawLongBits(r.nextGaussian()*12));
 		Island island=null;
+		WhirlPool wp=null;
 		double size=0;
 		double theta=0,distance=0;
 		for(int i=0;i<=(random.nextInt()&0xFF);i++)
@@ -434,6 +459,17 @@ public class SeaBoatWindow extends JFrame
 			distance=random.nextDouble()*(this.world.getRadius()-size);
 			island=new Island(Math.sin(theta)*distance,Math.cos(theta)*distance,size);
 			this.world.addEntity(island);
+		}
+		size=0;
+		theta=0;
+		distance=0;
+		for(int i=0;i<=(random.nextInt()&0xF);i++)
+		{
+			size=(random.nextDouble()+2)*10;
+			theta=(random.nextDouble()-0.5)*2*Math.PI;
+			distance=random.nextDouble()*(this.world.getRadius()-size);
+			wp=new WhirlPool(Math.sin(theta)*distance,Math.cos(theta)*distance,size);
+			this.world.addEntity(wp);
 		}
 	}
 	public void tick()
@@ -452,10 +488,9 @@ public class SeaBoatWindow extends JFrame
 				Scene s=((BaseScene)this.scene).getScene()==null?this::playScene:((BaseScene)this.scene).getScene();
 				if(((BaseScene)this.scene).getScene()==null)
 				{
-					this.sandbox=((com.sea.scene.Menu)this.scene).isSandboxRequested();
-					this.world=new BaseWorld(1000,this.highQuality);
+					this.world=new BaseWorld(1000,this.highQuality,((com.sea.scene.Menu)this.scene).isSandboxRequested());
 					this.world.addEntity(new Player(0,0));
-					if(!this.sandbox)
+					if(!this.world.isWorldSandbox())
 					{
 						this.worldGeneration(SeaBoatWindow.starttime);
 					}
@@ -576,6 +611,10 @@ public class SeaBoatWindow extends JFrame
 				player.setDirection(0);
 			}
 			this.world.tick();
+			if(k.isThisKeyPressed(75)&&k.isThisKeyPressed(89)&&k.isThisKeyPressed(83))
+			{
+				player.takeDamage(Long.MAX_VALUE);
+			}
 			this.lastctrlzpressed=k.isThisKeyPressed(17)&&k.isThisKeyPressed(90);
 			this.lastctrlppressed=k.isThisKeyPressed(17)&&k.isThisKeyPressed(80);
 			this.lastepressed=k.isThisKeyPressed(69);
